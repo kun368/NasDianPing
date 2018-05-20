@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  nas-dianping-dapp-server:
+    image: kun368/nas-dianping:master
+    restart: always
+    ports:
+      - "8102:80"
