@@ -4,79 +4,91 @@ import IceContainer from '@icedesign/container';
 import './TagMessageList.scss';
 import {Base64} from 'js-base64';
 import NebUtils from "../../../../util/NebUtils";
+import { MarketData } from '../../../../data/MarketContent';
+import { withRouter } from 'react-router-dom';
 
 const {Row, Col} = Grid;
 
 const Toast = Feedback.toast;
 
+@withRouter
 export default class TagMessageList extends Component {
   static displayName = 'TagMessageList';
 
   constructor(props) {
     super(props);
     this.state = {
-      dataSourceSend: [],
-      dataSourceRecv: []
+      dataSource: [],
+      tabName: '',
     };
   }
 
-  checkInstalledPlugin = () => {
-    return typeof(webExtensionWallet) !== 'undefined';
-  };
-
   componentDidMount() {
-    if (!NebUtils.checkInstalledPlugin()) {
-      Toast.error('还未安装Chrome扩展，请点击页面上方的下载按钮');
+    const {typeId} = this.props.match.params;
+    if (typeId && /^[\d]+$/.test(typeId)) {
+      const item = MarketData[parseInt(typeId)];
+      if (!item) return;
+      NebUtils.userCallAxios(
+        "queryCatVoucher",
+        `["${typeId}"]`,
+        resp => {
+          this.setState({
+            tabName: `大家对 ${item.title} 的点评`,
+            dataSource: resp,
+          })
+        },
+      );
     }
-    const contract = {
-      function: 'query',
-      args: `[]`,
-    };
-    NebUtils.pluginSimCall(
-      contract.function,
-      contract.args,
-      (err) => {
-        Toast.error("获取数据失败: " + err);
-      },
-      (item) => {
-        console.log(item);
-        this.setState({
-          dataSourceSend: item.send.arr,
-          dataSourceRecv: item.recv.arr,
-        });
-        Toast.success("获取您的兑现券数据成功");
+    else {
+      if (!NebUtils.checkInstalledPlugin()) {
+        Toast.error('还未安装Chrome扩展，无法查询您的点评信息，请点击页面上方的下载按钮！');
       }
-    );
+      NebUtils.getPluginUserAddress(addr => {
+        NebUtils.userCallAxios(
+          "queryUserVoucher",
+          `["${addr}"]`,
+          resp => {
+            this.setState({
+              tabName: `我发表的星云点评`,
+              dataSource: resp,
+            });
+          },
+        );
+      })
+    }
   }
 
   renderItem = (item, idx) => {
+    const dpItem = MarketData[parseInt(item.dpType)];
+    if (!dpItem) return '';
+
     return (
       <div style={styles.item} key={idx}>
-
         <div>
           <div style={styles.title}>
-            <span style={{fontWeight: 900}}>兑现券名：</span>{item.title}
-          </div>
-          <br/>
+            <span style={{fontWeight: 900}}>评价类型：</span>{dpItem.title}
+          </div><br/>
 
           <div style={styles.title}>
-            <span style={{fontWeight: 900}}>发送者：</span>{item.from}
-          </div>
-          <br/>
+            <span style={{fontWeight: 900}}>评价名称：</span>{Base64.decode(item.name)}
+          </div><br/>
 
           <div style={styles.title}>
-            <span style={{fontWeight: 900}}>接收者：</span>{item.to}
-          </div>
-          <br/>
+            <span style={{fontWeight: 900}}>商品链接：</span>
+            <a target="_blank" href={Base64.decode(item.link)}>{Base64.decode(item.link)}</a>
+          </div><br/>
 
           <div style={styles.title}>
-            <span style={{fontWeight: 900}}>内容：</span>{item.content}
-          </div>
-          <br/>
+            <span style={{fontWeight: 900}}>发表地址：</span>{item.from}
+          </div><br/>
 
           <div style={styles.title}>
-            <span style={{fontWeight: 900}}>备注：</span>{Base64.decode(item.remark)}
-          </div>
+            <span style={{fontWeight: 900}}>评价时间：</span>{new Date(item.time).toLocaleString()}
+          </div><br/>
+
+          <div style={styles.title}>
+            <span style={{fontWeight: 900}}>评价内容：</span>{Base64.decode(item.content)}
+          </div><br/>
         </div>
       </div>
     );
@@ -87,16 +99,10 @@ export default class TagMessageList extends Component {
       <div className="tag-message-list">
         <IceContainer>
           <Tab size="small">
-            <Tab.TabPane key={0} tab={`我发送的兑现券（${this.state.dataSourceSend.length}）`}>
-              {this.state.dataSourceSend.length === 0 ? '暂无数据' :
-                this.state.dataSourceSend.map((item, idx) => {
-                  return this.renderItem(item, idx, 0)
-                })}
-            </Tab.TabPane>
-            <Tab.TabPane key={1} tab={`我收到的兑现券（${this.state.dataSourceRecv.length}）`}>
-              {this.state.dataSourceRecv.length === 0 ? '暂无数据' :
-                this.state.dataSourceRecv.map((item, idx) => {
-                  return this.renderItem(item, idx, 1)
+            <Tab.TabPane key={0} tab={this.state.tabName}>
+              {this.state.dataSource.length === 0 ? '暂无数据' :
+                this.state.dataSource.map((item, idx) => {
+                  return this.renderItem(item, idx)
                 })}
             </Tab.TabPane>
           </Tab>
@@ -121,6 +127,7 @@ const styles = {
   title: {
     fontSize: '14px',
     color: '#666',
+    lineHeight: '14px',
   },
   date: {
     fontSize: '12px',

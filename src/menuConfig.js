@@ -43,13 +43,13 @@ const asideMenuConfig = [
     icon: 'shop',
   },
   {
-    name: '制作',
+    name: '点评',
     path: '/Create/:typeId',
     icon: 'publish',
   },
   {
     name: '我的',
-    path: '/MyCenter',
+    path: '/MyCenter/:typeId',
     icon: 'yonghu',
   },
 ];

@@ -26,7 +26,7 @@ const routerConfig = [
     component: Create,
   },
   {
-    path: '/MyCenter',
+    path: '/MyCenter/:typeId',
     layout: HeaderAsideFooterLayout,
     component: MyCenter,
   },

@@ -3,8 +3,8 @@ import axios from 'axios';
 
 const nebPay = new NebPay();
 
-const dappAddress = "n1qTYSFmJHHbhFQsMLHjk4foEbuKzqH1kZB";
-const netType = "mainnet";
+const dappAddress = "n1eEgpVuz5xGaNck8hJG1ujgSLfWH6waSsh";
+const netType = "testnet";
 
 export default class NebUtils {
 
@@ -66,6 +66,24 @@ export default class NebUtils {
   };
 
   /**
+   * 获取插件中已登录的用户地址
+   */
+  static getPluginUserAddress = (callback) => {
+    window.postMessage({
+      "target": "contentscript",
+      "data": {},
+      "method": "getAccount",
+    }, "*");
+    window.addEventListener('message', function (e) {
+      if (e.data && e.data.data) {
+        if (e.data.data.account) {
+          callback(e.data.data.account);
+        }
+      }
+    });
+  };
+
+  /**
    * 创建账户
    */
   static createAccount = () => {
@@ -114,7 +132,7 @@ export default class NebUtils {
   /**
    * 用Axios调用/user/call
    */
-  static userCallAsios = (func, args, errCallback, sucCallback) => {
+  static userCallAxios = (func, args, sucCallback, errCallback) => {
     const userAddress = NebUtils.createAccount();
     axios.post(`https://${netType}.nebulas.io/v1/user/call`, {
       "from": userAddress,
@@ -129,10 +147,12 @@ export default class NebUtils {
       }
     }).then(response => {
       const t = response.data.result.result;
-      console.log(t);
       sucCallback(JSON.parse(t));
     }).catch(function (error) {
-      errCallback(error);
+      console.log(error);
+      if (errCallback) {
+        errCallback(error);
+      }
     });
   };
 
@@ -154,5 +174,6 @@ export default class NebUtils {
         errCallback(error);
       });
     }, 5000);
-  }
+  };
+
 }

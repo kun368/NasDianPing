@@ -34,10 +34,11 @@ export default class CreateActivityForm extends Component {
     super(props);
     this.state = {
       value: {
-        toAddr: '',
-        title: '',
-        contnet: '',
-        remark: ''
+        dpType: '',
+        link: '',
+        name: '',
+        score: '',
+        content: '',
       },
     };
   }
@@ -46,14 +47,14 @@ export default class CreateActivityForm extends Component {
     const {typeId} = this.props.match.params;
     if (typeId && /^[\d]+$/.test(typeId)) {
       const item = MarketData[parseInt(typeId)];
-      console.log(item);
       if (item) {
         this.setState({
           value: {
-            toAddr: '',
-            title: item.title,
-            contnet: item.desc,
-            remark: '本兑换券最终解释权归xxx所有，兑换券有效期至xxxx年xx月xx日...'
+            dpType: item.title,
+            link: '',
+            name: '',
+            score: '',
+            content: '',
           },
         })
       }
@@ -69,10 +70,11 @@ export default class CreateActivityForm extends Component {
   reset = () => {
     this.setState({
       value: {
-        toAddr: '',
-        title: '',
-        contnet: '',
-        remark: ''
+        dpType: '',
+        link: '',
+        name: '',
+        score: '',
+        content: '',
       },
     });
   };
@@ -84,15 +86,23 @@ export default class CreateActivityForm extends Component {
       if (errors) {
         return;
       }
+      let dpType = MarketData.filter(it => {
+        return it.title === values.dpType
+      })[0];
+      if (!dpType) {
+        Toast.error("点评类型填写不正确，请在“市场”中选择点评类型！");
+        return;
+      }
       if (!NebUtils.checkInstalledPlugin()) {
         Toast.error('还未安装Chrome扩展，请点击页面上方的下载按钮');
       }
       const contract = {
-        function: 'create',
-        args: `["${values.toAddr}", "${values.title}", "${values.contnet}", "${Base64.encode(values.remark)}"]`,
+        function: 'createDianPing',
+        args: `["${dpType.id}", "${Base64.encode(values.link)}", "${Base64.encode(values.name)}",
+              "${values.score}", "${Base64.encode(values.content)}"]`,
       };
       NebUtils.pluginCall(contract.function, contract.args, (txHash) => {
-        Toast.success("已提交交易，交易成功即制作&发送兑换券成功！")
+        Toast.success("已提交交易，交易成功即点评成功！")
       });
     });
   };
@@ -100,7 +110,7 @@ export default class CreateActivityForm extends Component {
   render() {
     return (
       <div className="create-activity-form">
-        <IceContainer title="制作兑现券" style={styles.container}>
+        <IceContainer title="写星云点评" style={styles.container}>
           <IceFormBinderWrapper
             ref={(formRef) => {
               this.formRef = formRef;
@@ -111,65 +121,83 @@ export default class CreateActivityForm extends Component {
             <div>
               <Row style={styles.formItem}>
                 <Col xxs="6" s="2" l="2" style={styles.formLabel}>
-                  券名：
+                  点评类型：
                 </Col>
                 <Col s="16" l="16">
                   <IceFormBinder
-                    name="title"
+                    name="dpType"
                     required
-                    message="请填写兑现券券名"
+                    message="请填写点评类型"
                   >
                     <Input style={{width: '100%'}}/>
                   </IceFormBinder>
-                  <IceFormError name="title"/>
+                  <IceFormError name="dpType"/>
                 </Col>
               </Row>
 
               <Row style={styles.formItem}>
                 <Col xxs="6" s="2" l="2" style={styles.formLabel}>
-                  内容：
+                  点评名称：
                 </Col>
                 <Col s="16" l="16">
                   <IceFormBinder
-                    name="contnet"
+                    name="name"
                     required
-                    message="请填写兑现券内容"
+                    message="请填写点评商品名称"
                   >
                     <Input style={{width: '100%'}}/>
                   </IceFormBinder>
-                  <IceFormError name="contnet"/>
+                  <IceFormError name="name"/>
                 </Col>
               </Row>
 
               <Row style={styles.formItem}>
                 <Col xxs="6" s="2" l="2" style={styles.formLabel}>
-                  接收地址：
+                  点评链接：
                 </Col>
                 <Col s="16" l="16">
                   <IceFormBinder
-                    name="toAddr"
+                    name="link"
                     required
-                    message="请填写兑现券接收方NAS钱包地址"
+                    type="url"
+                    message="请填写点评链接URL"
                   >
                     <Input style={{width: '100%'}}/>
                   </IceFormBinder>
-                  <IceFormError name="toAddr"/>
+                  <IceFormError name="link"/>
+                </Col>
+              </Row>
+
+              <Row style={styles.formItem}>
+                <Col xxs="6" s="2" l="2" style={styles.formLabel}>
+                  评分：
+                </Col>
+                <Col s="16" l="16">
+                  <IceFormBinder
+                    name="score"
+                    required
+                    pattern={/^[12345]$/}
+                    message="请填写1-5分整数评分"
+                  >
+                    <Input style={{width: '100%'}}/>
+                  </IceFormBinder>
+                  <IceFormError name="score"/>
                 </Col>
               </Row>
 
               <Row>
                 <Col xxs="6" s="2" l="2" style={styles.formLabel}>
-                  备注：
+                  内容：
                 </Col>
                 <Col s="16" l="16">
-                  <IceFormBinder name="remark">
+                  <IceFormBinder name="contnet">
                     <Input multiple
                            rows={8}
                            style={{width: '100%'}}
                            required
-                           message="请填写备注"/>
+                           message="请填写点评内容"/>
                   </IceFormBinder>
-                  <IceFormError name="remark"/>
+                  <IceFormError name="contnet"/>
                 </Col>
               </Row>
 

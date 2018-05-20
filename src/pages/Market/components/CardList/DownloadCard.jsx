@@ -4,9 +4,12 @@ import { Tab, Button, Icon, Grid } from '@icedesign/base';
 import './DownloadCard.scss';
 import { Link } from 'react-router-dom';
 import { MarketData } from '../../../../data/MarketContent.js'
+import Create from '../../../Create/Create';
 
 const { Row, Col } = Grid;
 const { TabPane } = Tab;
+const ButtonGroup = Button.Group;
+
 
 export default class DownloadCard extends Component {
   static displayName = 'DownloadCard';
@@ -28,6 +31,41 @@ export default class DownloadCard extends Component {
     })
   }
 
+  renderButton = (item) => {
+     if (item.support) {
+       return (
+         <div style={styles.downloadButtons}>
+           <ButtonGroup>
+             <Button
+               type="primary"
+               component="a"
+               href={`/#/MyCenter/${item.id}`}
+             >
+               <Icon type="all" /> 查看点评
+             </Button>
+             <Button
+               type="primary"
+               component="a"
+               href={`/#/Create/${item.id}`}
+             >
+               <Icon type="survey" /> 我要点评
+             </Button>
+           </ButtonGroup>
+         </div>
+       );
+     }
+     return (
+       <div style={styles.downloadButtons}>
+         <Button
+           type="normal"
+           component="a"
+         >
+           <Icon type="loading" /> 开发中 敬请期待
+         </Button>
+       </div>
+     );
+  };
+
   renderContent = (data) => {
     if (!data) {
       return '暂无数据';
@@ -38,21 +76,13 @@ export default class DownloadCard extends Component {
           <div key={index} style={styles.columnCardItem}>
             <div style={styles.cardBody}>
               <div style={styles.avatarWrapper}>
-                <Icon type={item.img} size="xl"/>
+                {/*<Icon type={item.img} size="xl"/>*/}
+                <img style={styles.img} src={item.img} alt="头像" />
               </div>
               <p style={styles.title}>{item.title}</p>
               <p style={styles.desc}>{item.desc}</p>
             </div>
-
-            <div style={styles.downloadButtons}>
-              <Button
-                type="primary"
-                component="a"
-                href={`/#/Create/${item.id}`}
-              >
-                <Icon type="survey" /> 制作兑现券
-              </Button>
-            </div>
+            {this.renderButton(item)}
           </div>
         </Col>
       );
@@ -65,18 +95,9 @@ export default class DownloadCard extends Component {
       <div className="download-card" style={styles.downloadCard}>
         <IceContainer>
           <Tab type="bar" contentStyle={{ padding: '20px 5px' }}>
-            <TabPane tab="情侣 - 生活情趣" key="1">
+            <TabPane tab="点评市场" key="1">
               <Row gutter="20" wrap>
-                {this.renderContent(tabData.filter(it => {
-                  return it.type === 1
-                }))}
-              </Row>
-            </TabPane>
-            <TabPane tab="朋友 - 有来有去" key="2">
-              <Row gutter="20" wrap>
-                {this.renderContent(tabData.filter(it => {
-                  return it.type === 2
-                }))}
+                {this.renderContent(tabData)}
               </Row>
             </TabPane>
           </Tab>
