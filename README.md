@@ -1,4 +1,4 @@
-# NasDianPing: 星云兑换券
+# NasDianPing: 星云点评
 
 [![Build Status](https://travis-ci.org/kun368/NasDianPing.svg?branch=master)](https://travis-ci.org/kun368/NasDianPing)
 [![Language](https://img.shields.io/badge/language-javascript-blue.svg)](https://github.com/kun368/NasDianPing)
