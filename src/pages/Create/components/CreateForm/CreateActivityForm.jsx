@@ -190,14 +190,14 @@ export default class CreateActivityForm extends Component {
                   内容：
                 </Col>
                 <Col s="16" l="16">
-                  <IceFormBinder name="contnet">
+                  <IceFormBinder name="content">
                     <Input multiple
                            rows={8}
                            style={{width: '100%'}}
                            required
                            message="请填写点评内容"/>
                   </IceFormBinder>
-                  <IceFormError name="contnet"/>
+                  <IceFormError name="content"/>
                 </Col>
               </Row>
 
