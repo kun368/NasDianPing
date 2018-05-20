@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import SimpleSlider from './components/SimpleSlider/SimpleSlider';
+import ProductInfo from './components/ProductInfo/ProductInfo';
 
 export default class Home extends Component {
   static displayName = 'Home';
@@ -9,6 +11,11 @@ export default class Home extends Component {
   }
 
   render() {
-    return <div className="home-page" />;
+    return (
+      <div className="home-page">
+        <SimpleSlider/>
+        <ProductInfo/>
+      </div>
+    );
   }
 }

@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Tab, Feedback, Grid} from '@icedesign/base';
+import {Tab, Feedback, Grid, Rating } from '@icedesign/base';
 import IceContainer from '@icedesign/container';
 import './TagMessageList.scss';
 import {Base64} from 'js-base64';
@@ -34,7 +34,7 @@ export default class TagMessageList extends Component {
         resp => {
           this.setState({
             tabName: `大家对 ${item.title} 的点评`,
-            dataSource: resp,
+            dataSource: resp.reverse(),
           })
         },
       );
@@ -50,7 +50,7 @@ export default class TagMessageList extends Component {
           resp => {
             this.setState({
               tabName: `我发表的星云点评`,
-              dataSource: resp,
+              dataSource: resp.reverse(),
             });
           },
         );
@@ -64,32 +64,40 @@ export default class TagMessageList extends Component {
 
     return (
       <div style={styles.item} key={idx}>
-        <div>
-          <div style={styles.title}>
-            <span style={{fontWeight: 900}}>评价类型：</span>{dpItem.title}
-          </div><br/>
-
-          <div style={styles.title}>
-            <span style={{fontWeight: 900}}>评价名称：</span>{Base64.decode(item.name)}
-          </div><br/>
-
-          <div style={styles.title}>
-            <span style={{fontWeight: 900}}>商品链接：</span>
-            <a target="_blank" href={Base64.decode(item.link)}>{Base64.decode(item.link)}</a>
-          </div><br/>
-
-          <div style={styles.title}>
-            <span style={{fontWeight: 900}}>发表地址：</span>{item.from}
-          </div><br/>
-
-          <div style={styles.title}>
-            <span style={{fontWeight: 900}}>评价时间：</span>{new Date(item.time).toLocaleString()}
-          </div><br/>
-
-          <div style={styles.title}>
-            <span style={{fontWeight: 900}}>评价内容：</span>{Base64.decode(item.content)}
-          </div><br/>
-        </div>
+        <ul>
+          <li style={styles.detailItem}>
+            <div style={styles.detailTitle}>评价类型：</div>
+            <div style={styles.detailBody}>{dpItem.title}</div>
+          </li>
+          <li style={styles.detailItem}>
+            <div style={styles.detailTitle}>评价商品名称：</div>
+            <div style={styles.detailBody}>{Base64.decode(item.name)}</div>
+          </li>
+          <li style={styles.detailItem}>
+            <div style={styles.detailTitle}>商品链接：</div>
+            <div style={styles.detailBody}><a target="_blank" href={Base64.decode(item.link)}>{Base64.decode(item.link)}</a></div>
+          </li>
+          <li style={styles.detailItem}>
+            <div style={styles.detailTitle}>发表人地址：</div>
+            <div style={styles.detailBody}>{item.from}</div>
+          </li>
+          <li style={styles.detailItem}>
+            <div style={styles.detailTitle}>评价时间：</div>
+            <div style={styles.detailBody}>{new Date(item.time).toLocaleString()}</div>
+          </li>
+          <li style={styles.detailItem}>
+            <div style={styles.detailTitle}>评分：</div>
+            <div style={styles.detailBody}>
+              <span style={styles.statusProcessing}><Rating defaultValue={parseInt(item.score)} disabled /></span>
+            </div>
+          </li>
+          <li style={styles.detailItem}>
+            <div style={styles.detailTitle}>评价内容：</div>
+            <div style={styles.detailBody}>
+              {Base64.decode(item.content)}
+            </div>
+          </li>
+        </ul>
       </div>
     );
   };
@@ -119,28 +127,23 @@ const styles = {
   },
   item: {
     borderBottom: '3px solid #E5E5E5',
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     padding: '15px 0',
   },
-  title: {
-    fontSize: '14px',
-    color: '#666',
-    lineHeight: '14px',
+  detailItem: {
+    padding: '8px 0px',
+    display: 'flex',
+    borderTop: '1px solid #EEEFF3',
   },
-  date: {
-    fontSize: '12px',
-    color: '#666',
+  detailTitle: {
+    marginRight: '30px',
+    textAlign: 'right',
+    width: '120px',
+    color: '#999999',
   },
-  desc: {
-    lineHeight: '14px',
-    fontSize: '14px',
-    color: '#999',
+  detailBody: {
+    flex: 1,
   },
-  articleItem: {
-    marginBottom: '15px',
-    paddingBottom: '15px',
-    borderBottom: '1px solid #f5f5f5',
+  statusProcessing: {
+    color: '#64D874',
   },
 };
